@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id           String         @id @default(uuid())
+  name         String
+  stock        Int
+  reservations Reservation[]
+  logs         InventoryLog[]
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  password     String
+  createdAt    DateTime      @default(now())
+  reservations Reservation[]
+  orders       Order[]
+}
+
+model Reservation {
+  id        String   @id @default(uuid())
+  productId String
+  userId    String
+  status    String   @default("pending")
+  quantity  Int      @default(1)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  order     Order?
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  reservationId String      @unique
+  userId        String
+  createdAt     DateTime    @default(now())
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+}
+
+model InventoryLog {
+  id        String   @id @default(uuid())
+  productId String
+  action    String
+  quantity  Int
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+}
