@@ -23,7 +23,7 @@ function App() {
       setTimeLeft(left)
       if (left === 0) {
         setReservation(null)
-        setStatus('Rezervasyon süresi doldu!')
+        setStatus('Reservation expired!')
       }
     }, 1000)
     return () => clearInterval(interval)
@@ -36,7 +36,7 @@ function App() {
       setToken(data.token)
       setLoginError('')
     } catch {
-      setLoginError('Giriş başarısız')
+      setLoginError('Login failed')
     }
     setIsLoading(false)
   }
@@ -49,9 +49,17 @@ function App() {
       setToken(data.token)
       setLoginError('')
     } catch {
-      setLoginError('Kayıt başarısız, email zaten kullanımda olabilir')
+      setLoginError('Registration failed, email may already be in use')
     }
     setIsLoading(false)
+  }
+
+  const handleLogout = () => {
+    setToken('')
+    setEmail('')
+    setPassword('')
+    setReservation(null)
+    setStatus('')
   }
 
   const handleReserve = async () => {
@@ -60,10 +68,10 @@ function App() {
       const res = await reserve(PRODUCT_ID, token)
       setReservation(res)
       setTimeLeft(5 * 60 * 1000)
-      setStatus('Rezervasyon oluşturuldu!')
+      setStatus('Reservation created!')
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } }
-      setStatus(error.response?.data?.error || 'Hata oluştu')
+      setStatus(error.response?.data?.error || 'An error occurred')
     }
     setIsLoading(false)
   }
@@ -74,10 +82,10 @@ function App() {
     try {
       await checkout(reservation.id, token)
       setReservation(null)
-      setStatus('Satın alma tamamlandı! 🎉')
+      setStatus('Purchase completed! 🎉')
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } }
-      setStatus(error.response?.data?.error || 'Hata oluştu')
+      setStatus(error.response?.data?.error || 'An error occurred')
     }
     setIsLoading(false)
   }
@@ -92,7 +100,7 @@ function App() {
     return (
       <div style={styles.container}>
         <div style={styles.card}>
-          <h1 style={styles.title}>{isRegister ? 'Kayıt Ol' : 'Giris Yap'}</h1>
+          <h1 style={styles.title}>{isRegister ? '📝 Register' : '🔐 Login'}</h1>
           <input
             style={styles.input}
             type="email"
@@ -103,39 +111,39 @@ function App() {
           <input
             style={styles.input}
             type="password"
-            placeholder="Sifre"
+            placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
           {loginError && <p style={styles.status}>{loginError}</p>}
           <button style={styles.button} onClick={isRegister ? handleRegister : handleLogin} disabled={isLoading}>
-            {isLoading ? 'Yukleniyor...' : isRegister ? 'Kayıt Ol' : 'Giris Yap'}
+            {isLoading ? 'Loading...' : isRegister ? 'Register' : 'Login'}
           </button>
           <p
             style={{ color: '#94a3b8', marginTop: '1rem', cursor: 'pointer', fontSize: '0.9rem' }}
             onClick={() => { setIsRegister(!isRegister); setLoginError('') }}
           >
-            {isRegister ? 'Zaten hesabin var mi? Giris yap' : 'Hesabin yok mu? Kayıt ol'}
+            {isRegister ? 'Already have an account? Login' : "Don't have an account? Register"}
           </p>
         </div>
       </div>
     )
   }
 
-  if (loading) return <div style={styles.container}>Yukleniyor...</div>
-  if (!product) return <div style={styles.container}>Urun bulunamadi</div>
+  if (loading) return <div style={styles.container}>Loading...</div>
+  if (!product) return <div style={styles.container}>Product not found</div>
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.title}>Limited Drop</h1>
+        <h1 style={styles.title}>🔥 Limited Drop</h1>
         <h2 style={styles.productName}>{product.name}</h2>
         <p style={styles.stock}>
-          Kalan stok: <strong style={{ color: product.stock === 0 ? 'red' : 'green' }}>{product.stock}</strong>
+          Remaining stock: <strong style={{ color: product.stock === 0 ? 'red' : 'green' }}>{product.stock}</strong>
         </p>
         {reservation && (
           <div style={styles.timer}>
-            <p>Rezervasyon suresi: <strong>{formatTime(timeLeft)}</strong></p>
+            <p>⏱ Reservation expires in: <strong>{formatTime(timeLeft)}</strong></p>
           </div>
         )}
         {status && <p style={styles.status}>{status}</p>}
@@ -145,7 +153,7 @@ function App() {
             onClick={handleReserve}
             disabled={product.stock === 0 || isLoading}
           >
-            {isLoading ? 'Yukleniyor...' : product.stock === 0 ? 'Stok Tukendi' : 'Rezerve Et'}
+            {isLoading ? 'Loading...' : product.stock === 0 ? 'Out of Stock' : 'Reserve'}
           </button>
         ) : (
           <button
@@ -153,12 +161,18 @@ function App() {
             onClick={handleCheckout}
             disabled={isLoading}
           >
-            {isLoading ? 'Yukleniyor...' : 'Satin Al'}
+            {isLoading ? 'Loading...' : 'Purchase'}
           </button>
         )}
         <p style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '1rem' }}>
-          {email} olarak giris yapildi
+          Logged in as {email}
         </p>
+        <button
+          style={{ ...styles.button, backgroundColor: '#ef4444', marginTop: '0.5rem' }}
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
       </div>
     </div>
   )
