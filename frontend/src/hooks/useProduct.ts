@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react'
 import { getProduct } from '../api'
 
+interface Product {
+  id: string
+  name: string
+  stock: number
+}
+
 export const useProduct = (productId: string) => {
-  const [product, setProduct] = useState<any>(null)
+  const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -12,6 +18,7 @@ export const useProduct = (productId: string) => {
         setProduct(data)
         setLoading(false)
       } catch (err) {
+        console.error('Failed to fetch product:', err)
         setLoading(false)
       }
     }
