@@ -1,9 +1,26 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import App from './App';
+import { render, screen } from '@testing-library/react'
+import App from './App'
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
-});
+test('renders login page', () => {
+  render(<App />)
+  const loginButton = screen.getByRole('button', { name: /login/i })
+  expect(loginButton).toBeInTheDocument()
+})
+
+test('renders register link', () => {
+  render(<App />)
+  const registerLink = screen.getByText(/don't have an account/i)
+  expect(registerLink).toBeInTheDocument()
+})
+
+test('renders email input', () => {
+  render(<App />)
+  const emailInput = screen.getByPlaceholderText(/email/i)
+  expect(emailInput).toBeInTheDocument()
+})
+
+test('renders password input', () => {
+  render(<App />)
+  const passwordInput = screen.getByPlaceholderText(/password/i)
+  expect(passwordInput).toBeInTheDocument()
+})
