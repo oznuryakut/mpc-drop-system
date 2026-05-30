@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -22,7 +23,6 @@ app.use(rateLimiter)
 
 app.use('/products', productRouter)
 app.use('/users', userRouter)
-app.use('/', reservationRouter)
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date() })
@@ -35,6 +35,14 @@ app.get('/metrics', async (req, res) => {
     prisma.order.count()
   ])
   res.json({ products, reservations, orders, uptime: process.uptime(), timestamp: new Date() })
+})
+
+app.use('/', reservationRouter)
+
+const publicPath = path.join(__dirname, '..', 'public')
+app.use(express.static(publicPath))
+app.get('/*splat', (req, res) => {
+  res.sendFile(path.join(publicPath, 'index.html'))
 })
 
 app.use(errorHandler)
@@ -50,7 +58,7 @@ setInterval(async () => {
       prisma.inventoryLog.create({ data: { productId: res.productId, action: 'RESERVATION_EXPIRED', quantity: res.quantity } })
     ])
   }
-  if (expired.length > 0) console.log(`${expired.length} rezervasyon expire edildi`)
+  if (expired.length > 0) console.log(`${expired.length} reservations expired`)
 }, 60 * 1000)
 
 app.listen(PORT, () => {
