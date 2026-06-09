@@ -2,9 +2,6 @@
 
 A production-grade limited-stock product drop system built with Node.js, TypeScript, Prisma, and React.
 
-## Live Demo
-- Frontend: (Pxxl link will be added after deploy)
-- Backend: (Render link will be added after deploy)
 
 ## Architecture
 
